@@ -2,7 +2,7 @@ import os
 
 class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    CUCM = "10.66.120.120"
+    CUCM = "ip_address" # enter ip address or fqdn of cucm
     VERSION = "12.0"
     CUCM_USER = os.environ.get("CUCM_USER")
     CUCM_PWD = os.environ.get("CUCM_PWD")
