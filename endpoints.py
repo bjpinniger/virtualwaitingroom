@@ -33,9 +33,6 @@ def get_IPaddress(filter):
         'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
         'ns1': 'http://schemas.cisco.com/ast/soap'
         }
-
-    #print (SOAPRequest.text)
-
     root = ET.fromstring(SOAPRequest.text)
     devices = root.find('.//ns1:TotalDevicesFound', ns)
     if int(devices.text) > 0:
