@@ -1,0 +1,28 @@
+{% extends "header.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<div class="container" align="center" style="width: 100%;">
+  <h2 >Select Camera Preset</h2>
+    <hr>
+    <p>
+      <table>
+        <col width="25%">
+  
+        {% for id,name in presets %}
+            <tr style = "padding: 20pt;">
+                <td><a  href="{{ url_for('sendpreset', id=id, name=name, device=device, IP=IP) }}" class="btn btn-primary btn-block" role="button">{{ name }}</a></td>
+            </tr>
+        {% endfor %}
+      </table>
+
+      {% if result is not none %}
+        <h3 style = "padding: 10pt;">{{ result }}</h3>
+        <p></p>
+      {% endif %}  
+  
+    </p>
+</div>
+{% endblock %}
+
+

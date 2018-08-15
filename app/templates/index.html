@@ -1,0 +1,16 @@
+{% extends "index-head.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% from "_render_field_no_label.html" import render_field_no_label %}
+
+{% block app_content %}
+<div class="container" style="width: 75%;">
+    <h2 style = "text-align:center">Select Endpoint</h2>
+    <hr>
+    <form action="" method="post" class="form" role="form">
+        {{ form.csrf_token() }}
+        <d1>
+            {{ render_field_no_label(form.endpoint) }}
+        </d1>
+    <p><input type=submit class='btn btn-primary btn-block' value="Submit"></p>
+    </form>
+{% endblock %}

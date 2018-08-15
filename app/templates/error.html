@@ -1,0 +1,16 @@
+{% extends "header.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<div class="container" align="center">
+  <h2>Sorry, we've run into a problem!</h2>
+    <hr>
+    {% if result is not none %}
+    <h3 style = "color:crimson; padding: 10pt;">{{ result }}</h3>
+    {% endif %}  
+    <h4 style = "font-style: italic; padding: 10pt;">Select Home at the top of the screen to try again....</h4>
+    </p>
+</div>
+{% endblock %}
+
+

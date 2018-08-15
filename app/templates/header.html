@@ -1,0 +1,24 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}
+    Virtual Remote
+{% endblock %}
+
+{% block navbar %}
+    <nav class="navbar" style = "text-align: center; ">   
+        <div><a href="{{ url_for('index') }}">Home</a></div>
+    </nav>
+{% endblock %}
+
+{% block content %}
+<style>
+    table, td, th {
+        padding: 5px;
+        height: 50px;
+        text-align: center;
+    }
+</style>
+
+{% block app_content %}{% endblock %}
+
+{% endblock %}
