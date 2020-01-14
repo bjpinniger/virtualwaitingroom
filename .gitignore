@@ -48,3 +48,7 @@ Procfile
 *.sqlite
 /__pycache__
 app/__pycache__/
+Canopy.py
+/canopy
+app/static/qg-logo-white.png
+/.vscode
