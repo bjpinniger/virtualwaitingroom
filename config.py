@@ -1,14 +1,22 @@
 import os
+from dotenv import load_dotenv
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, '.flaskenv'))
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    CUCM = "0.0.0.0" # enter ip address or fqdn of cucm
-    VERSION = "12.0" # change this to match the AXL version you want to use, see here: https://developer.cisco.com/docs/axl/#!versioning
-    CUCM_USER = os.environ.get("CUCM_USER")
-    CUCM_PWD = os.environ.get("CUCM_PWD")
-    FILTER = "%SX%" # this is the filter to use for the endpoints, based on the description of the endpoint in CUCM
-    USERNAME = os.environ.get("TP_USERNAME") # username for the codec
-    PASSWORD = os.environ.get("TP_PASSWORD") # password for the codec
+    CMS_IP = os.environ.get("CMS_IP")
+    CMS_USER = os.environ.get("CMS_USER")
+    CMS_PWD = os.environ.get("CMS_PWD")
+    host_CLP = os.environ.get("host_CLP")
+    MONGO_URI = os.environ.get("MONGO_URI")
+    LDAP_HOST = os.environ.get("LDAP_HOST")
+    LOGO = True
+
     WTF_CSRF_ENABLED = True
-    # Disable debugging
+    # Disable/Enable debugging
     DEBUG = True
+    

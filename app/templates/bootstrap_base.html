@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    {% block head %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    {% block styles %}
+    <!-- Bootstrap CSS -->
+    {{ bootstrap.load_css() }}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    {% endblock %}
+
+    <title>Virtual Waiting Room</title>
+    {% endblock %}
+  </head>
+  <body>
+      {% block navbar %}
+      <nav class="navbar bg-dark navbar-dark" sytle="height; 100px">
+          <a class="navbar-brand" href="#">
+            <span>
+              {% if session['logo'] %}
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="width:20px;">
+              {% endif %}
+              &nbsp;&nbsp; Telehealth Virtual Clinic
+              {% if current_user.is_authenticated %}
+              - {{ session['name'] }}
+              {% endif %}
+            </span>
+          </a>
+
+        <!-- Links -->
+        <ul class="nav justify-content-end">
+          <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('home') }}" style="margin-right:15px;" title="Home"><img src="{{ url_for('static', filename='home_32_w@3x.png') }}" width="25" alt="Home"></a>
+            </li>
+            {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('logout') }}" style="margin-right:15px;" title="Logout"><img src="{{ url_for('static', filename='icons8-logout_rounded_up.png') }}" width="25" alt="Logout"></a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('login') }}" style="margin-right:15px;" title="Login"><img src="{{ url_for('static', filename='icons8-login.png') }}" width="25" alt="Login"></a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('settings') }}" style="margin-right:15px;" title="Settings"><img src="{{ url_for('static', filename='settings_32_w@3x.png') }}" width="25" alt="Settings"></a>
+            </li>
+        </ul>
+          
+      </nav>
+    {% endblock %}
+
+    <!-- Your page content -->
+    <div class="container">
+      {% include "flash.html" %}
+      {% block content %}
+      <style>
+      
+          .loader {
+              border: 8px solid #f3f3f3;
+              border-radius: 50%;
+              border-top: 8px solid #3498db;
+              width: 45px;
+              height: 45px;
+              -webkit-animation: spin 2s linear infinite; /* Safari */
+              animation: spin 2s linear infinite;
+              margin:auto;
+              left:0;
+              right:0;
+              top:0;
+              bottom:0;
+              position:fixed;
+              }
+      
+          /* Safari */
+          @-webkit-keyframes spin {
+              0% { -webkit-transform: rotate(0deg); }
+              100% { -webkit-transform: rotate(360deg); }
+              }
+      
+          @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+              }
+      
+      </style>
+
+      {# application content needs to be provided in the app_content block #}
+      {% block app_content %}{% endblock %}
+
+    {% endblock %}
+    </div>
+
+    {% block scripts %}
+      <!-- Optional JavaScript -->
+      {{ bootstrap.load_js() }}
+    {% endblock %}
+  </body>
+</html>

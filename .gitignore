@@ -35,3 +35,16 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# other #
+#########
+.env
+toolbox.png
+toolbox_transparent.png
+Procfile
+/venv
+*.log
+*.sql
+*.sqlite
+/__pycache__
+app/__pycache__/

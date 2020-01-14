@@ -1,11 +1,9 @@
-# Virtual-Remote
+# Virtual Waiting Room
 
-This app allows a user to select an endpoint and then activate the camera presets that are available on the codec.
+This app uses the Cisco Meeting Server (CMS) api to allow a doctor to enter a Virtual Waiting Room and see what patients are waiting, and how long they've been waiting. The doctor can move a patient into their consultation queue, then decide how to connect to the patient, either by browser, a video client, or by having CMS call them at a remote destination (number or SIP URI).
 
-Modify the config.py file for your enviornment.
+To create environment variables for config.py add these to .env file in the root folder.
 
-To create environment variables run the following from a command prompt...
-
-export VARIABLE_NAME=variable_value
+You'll also need to provide a connection URI to a Mongo DB.
 
 install requirements by running the following: pip install -r requirements.txt

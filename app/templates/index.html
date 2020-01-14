@@ -1,16 +1,26 @@
-{% extends "index-head.html" %}
-{% import 'bootstrap/wtf.html' as wtf %}
-{% from "_render_field_no_label.html" import render_field_no_label %}
+{% extends "bootstrap_base.html" %}
+{% from "_render_field.html" import render_field %}
 
 {% block app_content %}
-<div class="container" style="width: 75%;">
-    <h2 style = "text-align:center">Select Endpoint</h2>
-    <hr>
-    <form action="" method="post" class="form" role="form">
-        {{ form.csrf_token() }}
-        <d1>
-            {{ render_field_no_label(form.endpoint) }}
-        </d1>
-    <p><input type=submit class='btn btn-primary btn-block' value="Submit"></p>
-    </form>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-1 col-md-2 col-lg-3"></div>
+            <div class="col-xs-10 col-md-8 col-lg-6"> 
+                <h2 style = "text-align: center; padding: 10pt;">Virtual Waiting Room</h2>
+            </div>
+        <div class="col-xs-1 col-md-2 col-lg-3"></div>
+    </div>
+    <div class="row">
+        <div class="col-xs-1 col-md-2 col-lg-3"></div>
+            <div class="col-xs-10 col-md-8 col-lg-6">
+                <form action="" method="post" class="form" role="form">
+                    {{ form.csrf_token() }}
+                    <p></p>
+                    {{ render_field(form.tenants) }}
+                    <input type=submit id="submit" class='btn btn-primary btn-block' value="Join Waiting Room">
+                </form>
+            </div>
+        <div class="col-xs-1 col-md-2 col-lg-3"></div>
+    </div>
+</div>
 {% endblock %}

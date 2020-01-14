@@ -1,1 +1,2 @@
-FLASK_APP=virtualremote.py
+FLASK_APP=vwr.py
+FLASK_ENV=development
