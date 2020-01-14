@@ -39,8 +39,6 @@ Thumbs.db
 # other #
 #########
 .env
-toolbox.png
-toolbox_transparent.png
 Procfile
 /venv
 *.log
