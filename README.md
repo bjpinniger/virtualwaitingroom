@@ -9,3 +9,8 @@ You'll also need to provide a connection URI to a Mongo DB.
 clone canopy - https://github.com/ciscocms/canopy
 
 install requirements by running the following: pip install -r requirements.txt
+
+The first time you login to the app make sure you login with user/password = admin/admin. There are some initial setup tasks that need to be performed, such as creating Call Leg Profiles and Tenants on the CMS server.
+
+The users (doctors) will need to login with LDAP credentials. Make sure you provide the same LDAP server details that are used on your CMS server.
+

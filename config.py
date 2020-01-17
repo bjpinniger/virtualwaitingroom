@@ -8,10 +8,10 @@ load_dotenv(dotenv_path)
 
 class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY')
+    ENCRYPT_PASS = os.environ.get('ENCRYPT_PASS')
     CMS_IP = os.environ.get("CMS_IP")
     CMS_USER = os.environ.get("CMS_USER")
     CMS_PWD = os.environ.get("CMS_PWD")
-    host_CLP = os.environ.get("host_CLP")
     MONGO_URI = os.environ.get("MONGO_URI")
     LDAP_HOST = os.environ.get("LDAP_HOST")
     LOGO = True

@@ -4,6 +4,7 @@ from app import app
 import Canopy
 import pprint as pp
 import urllib3
+from app.extensions import Extensions
 
 urllib3.disable_warnings()
 
@@ -11,7 +12,6 @@ app.config.from_object(Config)
 CMS_IP = Config.CMS_IP
 user = Config.CMS_USER
 pwd = Config.CMS_PWD
-host_CLP = Config.host_CLP
 
 a = Canopy.Acano(CMS_IP, user, pwd)
 auth = "Basic " + base64.b64encode(str.encode(user + ":" + pwd)).decode("utf-8")
@@ -71,6 +71,9 @@ class CMS:
         return coSpace_id
 
     def createAccessMethod(coSpace_id, callId, name):
+        settings = Extensions.get_admin_settings()
+        host_CLP = settings['host_CLP']
+        print ("host CLP: " + host_CLP)
         payload = {
             'passcode' : '12345',
             'uri' : name + '.space',
@@ -80,7 +83,7 @@ class CMS:
         response = a.create_coSpace_access_method(coSpace_id, payload)
         pp.pprint (response)
 
-    def getSpaces(filter_name):
+    def getSpaces(filter_name, space_list):
         params = {'filter':filter_name}
         url = base_URL + "coSpaces"
         headers = {
@@ -89,13 +92,60 @@ class CMS:
             }
         response = requests.get(url=url, headers=headers, params=params, verify=False)
         spaces = xmltodict.parse(response.text)
-        space_list = spaces['coSpaces']['coSpace']
-        for space in space_list:
-            print (space['@id'])
+        total_spaces = int(spaces['coSpaces']['@total'])
+        if total_spaces == 1:
+            space_name = spaces['coSpaces']['coSpace']['name']
+            space_id = spaces['coSpaces']['coSpace']['@id']
+            space_list.append((space_id, space_name))
+        elif total_spaces > 1:
+            try:
+                spaces_list = spaces['coSpaces']['coSpace']
+            except:
+                spaces_list = []
+            for space in spaces_list:
+                space_list.append((space['@id'], space['name']))
+        return space_list
 
-    def createTenant(tenant_name):
+    def deleteSpaces(space_list):
+        for coSpace_id in space_list:
+            print (coSpace_id)
+            response = a.delete_coSpace(coSpace_id)
+            pp.pprint (response)
+
+    def createGuest_CLP(name):
         payload = {
-            'name': tenant_name
+            'needsActivation': True,
+            'deactivationMode': 'deactivate',
+            'name': name,
+            'presentationViewingAllowed': True,
+            'sipPresentationChannelEnabled': True,
+            'bfcpMode': 'serverOnly'
+            }
+        response = a.create_call_leg_profile(payload)
+        Guest_CLP_ID = response['@id']
+        return Guest_CLP_ID.strip()
+
+    def createHost_CLP(name):
+        payload = {
+            'needsActivation': False,
+            'deactivationMode': 'deactivate',
+            'name': name,
+            'presentationViewingAllowed': True,
+            'sipPresentationChannelEnabled': True,
+            'bfcpMode': 'serverOnly',
+            'recordingControlAllowed': True,
+            'streamingControlAllowed': True,
+            'callLockAllowed': True
+            }
+        response = a.create_call_leg_profile(payload)
+        pp.pprint (response)
+        Host_CLP_ID = response['@id']
+        return Host_CLP_ID.strip()
+
+    def createTenant(tenant_name, guest_CLP):
+        payload = {
+            'name': tenant_name,
+            'callLegProfile': guest_CLP
         }
         response = a.create_tenant(payload)
         pp.pprint (response)
@@ -104,6 +154,14 @@ class CMS:
         response = a.get_tenant(tenant_id)
         tenant_name = response['tenant']['name']
         return tenant_name
+
+    def deleteTenant(tenant_id):
+        url = base_URL + "tenants/" + tenant_id
+        headers = {
+            'Authorization': auth
+            }
+        response = requests.request("DELETE", url, headers=headers, verify=False)
+        print(response.text.encode('utf8'))
 
     def getTenants():
         print ("getting tenants")
@@ -114,10 +172,16 @@ class CMS:
             }
         response = requests.get(url=url, headers=headers, verify=False)
         tenants = xmltodict.parse(response.text)
-        tenants_list = tenants['tenants']['tenant']
+        total_tenants = int(tenants['tenants']['@total'])
         tenant_list = []
-        for tenant in tenants_list:
-            tenant_list.append((tenant['@id'], tenant['name']))
+        if total_tenants == 1:
+            tenant_name = tenants['tenants']['tenant']['name']
+            tenant_id = tenants['tenants']['tenant']['@id']
+            tenant_list.append((tenant_id, tenant_name))
+        elif total_tenants > 1:
+            tenants_list = tenants['tenants']['tenant']
+            for tenant in tenants_list:
+                tenant_list.append((tenant['@id'], tenant['name']))
         return tenant_list
 
     def getUserCoSpaces(user_id):
@@ -193,9 +257,10 @@ class CMS:
         }
         response = a.modify_coSpace(coSpace_id, payload)
         pp.pprint (response)
+        settings = Extensions.get_admin_settings()
         payload = {
             'userJid' : userJid,
-            'callLegProfile' : host_CLP
+            'callLegProfile' : settings['host_CLP']
         }
         response = a.add_member_to_coSpace(coSpace_id, payload)
         pp.pprint (response)
@@ -215,7 +280,6 @@ class CMS:
             access_method_id = access_method['@id']
         return access_method_id
             
-
     def getAccessMethodDetails(coSpace_id, access_method_id):
         url = base_URL + "coSpaces/" + coSpace_id + "/accessMethods/" + access_method_id
         headers = {
@@ -232,13 +296,14 @@ class CMS:
         return uri, passcode, link
 
     def addParticipantToCall(call_id, remoteParty):
+        settings = Extensions.get_admin_settings()
         url = base_URL + "calls/" + call_id + "/participants"
         headers = {
             'Authorization': auth,
             'Content-Type': 'application/x-www-form-urlencoded',
             'cache-control': "no-cache"
             }
-        payload = ("remoteParty={0}&callLegProfile={1}").format(remoteParty, host_CLP)
+        payload = ("remoteParty={0}&callLegProfile={1}").format(remoteParty, settings['host_CLP'])
         try:
             response = requests.post(url, headers=headers, data=payload, verify=False)
             pp.pprint (response)

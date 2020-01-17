@@ -1,9 +1,9 @@
 from flask import Flask, render_template, flash, request, redirect, url_for, jsonify, json, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app import app, lm
-from app.forms import VWR_Admin, LoginForm, Endpoint, EnterEndpoint
+from app.forms import VWR_Admin, LoginForm, Endpoint, EnterEndpoint, AdminSettings, Admin
 from cms import CMS
-from app.extensions import get_user, validate_user, update_settings, get_settings
+from app.extensions import Extensions 
 import pprint as pp
 from config import Config
 import time
@@ -20,13 +20,59 @@ app.secret_key = Config.SECRET_KEY
 def home():
     session['logo'] = Config.LOGO
     tenant_list = CMS.getTenants()
-    form = VWR_Admin()
+    if current_user.username == "admin":
+        form = Admin()
+        template = "admin.html"
+        settings = Extensions.get_admin_settings()
+        space_list = []
+        for tenant in tenant_list:
+            tenant_name = tenant[1]
+            space_filter = tenant_name.replace(" ", "_")
+            print (space_filter)
+            space_list = CMS.getSpaces(space_filter, space_list)
+        form.spaces.choices = space_list
+        try:
+            guestCLP = settings['guest_CLP']
+        except:
+            guestCLP = ""
+        try:
+            hostCLP = settings['host_CLP']
+        except:
+            hostCLP = ""
+    else:
+        form = VWR_Admin()
+        template = "index.html"
     form.tenants.choices = tenant_list
     if request.method == 'POST':
-        tenant_id = request.form['tenants']
-        return redirect(url_for('vwr', tenant_id=tenant_id))
+        if "tenants" in request.form:
+            tenant_id = request.form['tenants']
+        if "create_tenant" in request.form:
+            print ("create_tenant")
+            CMS.createTenant(request.form['tenant'], settings['guest_CLP'])
+        elif "delete_tenant" in request.form:
+            print ("delete_tenant")
+            CMS.deleteTenant(tenant_id)
+        elif "create_guest_CLP" in request.form:
+            print ("create_guest_CLP")
+            Guest_CLP_ID = CMS.createGuest_CLP("guest")
+            Extensions.update_admin_settings(Guest_CLP_ID, "")
+        elif "create_host_CLP" in request.form:
+            print ("create_host_CLP")
+            Host_CLP_ID = CMS.createHost_CLP("host")
+            Extensions.update_admin_settings("", Host_CLP_ID)
+        elif "delete_spaces" in request.form:
+            print ("delete_spaces")
+            spaceIdList = request.form.getlist('spaces')
+            CMS.deleteSpaces(spaceIdList)
+        if current_user.username == "admin":
+            return redirect(url_for('home'))
+        else:
+            return redirect(url_for('vwr', tenant_id=tenant_id))
     elif request.method == 'GET':
-        return render_template('index.html', form = form)
+        if current_user.username == "admin":
+            return render_template(template, form = form, guestCLP = guestCLP, hostCLP = hostCLP)
+        else:
+            return render_template(template, form = form)
 
 @app.route("/patient", methods=['GET', 'POST'])
 def patient():
@@ -53,7 +99,7 @@ def patient():
 def vwr():
     tenant_id = request.args.get('tenant_id', None)
     tenant_name = CMS.getTenant(tenant_id)
-    Callback = get_settings(current_user.username)
+    Callback = Extensions.get_settings(current_user.username)
     form = EnterEndpoint()
     form.endpoint.data = Callback
     form.tenant_id.data = tenant_id
@@ -111,19 +157,33 @@ def vwr():
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    Callback = get_settings(current_user.username)
-    form = Endpoint()
-    form.endpoint.data = Callback
+    if current_user.username == "admin":
+        form = AdminSettings()
+        template = "settings_admin.html"
+    else:
+        Callback = Extensions.get_settings(current_user.username)
+        form = Endpoint()
+        form.endpoint.data = Callback
+        template = "settings.html"
     if request.method == 'POST':
         if form.validate() == False:
             flash('All fields are required.')
-            return render_template('settings.html', form = form)
+            return render_template(template, form = form)
         else:
-            result = update_settings(current_user.username, request.form['endpoint'])
-            print (result)
-            return redirect(url_for('home'))
+            if current_user.username == "admin":
+                success = Extensions.change_pwd(current_user.username, request.form['current_password'], request.form['password'])
+                if success:
+                    flash("Password changed successfully!", category='success')
+                    return redirect(url_for('home'))
+                else:
+                    flash("Wrong password!", category='error')
+                    return render_template(template, form = form)
+            else:
+                result = Extensions.update_settings(current_user.username, request.form['endpoint'])
+                print (result)
+                return redirect(url_for('home'))
     elif request.method == 'GET':
-        return render_template('settings.html', form = form)
+        return render_template(template, form = form)
 
 @app.route("/sendcmd", methods=['GET', 'POST'])
 def sendcmd():
@@ -153,13 +213,20 @@ def login():
     form = LoginForm()
     if request.method == 'POST' and form.validate_on_submit():
         username = form.username.data
-        success, fullName = CMS.verifyUser(username)
-        if success:
-            user_obj, result = validate_user(username, form.password.data, fullName)
-            if result == "success":
-                session['name'] = fullName
-                login_user(user_obj)
-                flash("Logged in successfully!", category='success')
+        if username == "admin":
+            fullName = "Administrator"
+            user_obj, result = Extensions.validate_user(username, form.password.data, fullName)
+        else:
+            success, fullName = CMS.verifyUser(username)
+            if success:
+                user_obj, result = Extensions.validate_user(username, form.password.data, fullName)
+        if result == "success" or result == "changePWD":
+            session['name'] = fullName
+            login_user(user_obj)
+            flash("Logged in successfully!", category='success')
+            if result == "changePWD":
+                return redirect(url_for("settings"))
+            else:
                 return redirect(request.args.get("next") or url_for("home"))
         flash("Wrong username or password!", category='error')
     return render_template('login.html', title='login', form=form)
@@ -172,5 +239,5 @@ def logout():
 
 @lm.user_loader
 def load_user(username):
-    user_obj = get_user(username)
+    user_obj = Extensions.get_user(username)
     return user_obj

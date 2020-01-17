@@ -1,0 +1,30 @@
+{% extends "bootstrap_base.html" %}
+{% from "_render_field.html" import render_field %}
+
+{% block app_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-1 col-md-2 col-lg-3"></div>
+        <div class="col-xs-10 col-md-8 col-lg-6 text-center">
+            <h2 align="center" style="padding-top: 10pt; padding-bottom: 10pt;">Change Password</h2>
+        </div>
+        <div class="col-xs-1 col-md-2 col-lg-3"></div>
+    </div>
+    <div class="row">
+        <div class="col-xs-1 col-md-2 col-lg-3"></div>
+        <div class="col-xs-10 col-md-8 col-lg-6">
+            <form action="" method="post" class="form" role="form">
+                {{ form.csrf_token() }}
+                <dl>
+                    {{ render_field(form.current_password) }}
+                    {{ render_field(form.password) }}
+                    {{ render_field(form.password2) }}
+                </dl>
+                <p></p>
+                <p><input type=submit class='btn btn-primary btn-block' value="Submit"></p>
+            </form>
+        </div>
+        <div class="col-xs-1 col-md-2 col-lg-3"></div>
+    </div>
+</div>
+{% endblock %}

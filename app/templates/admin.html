@@ -1,0 +1,79 @@
+{% extends "bootstrap_base.html" %}
+{% from "_render_field_no_label.html" import render_field_no_label %}
+
+{% block app_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-xs-1 col-md-2 col-lg-3"></div>
+            <div class="col-xs-10 col-md-8 col-lg-6"> 
+                <h2 style = "text-align: center; padding: 10pt;">Admin</h2>
+            </div>
+        <div class="col-xs-1 col-md-2 col-lg-3"></div>
+    </div>
+    <form action="" method="post" class="form" role="form">
+        {{ form.csrf_token() }}
+        <div class="row">
+            <div class="col-xs-1 col-md-2 col-lg-3">
+                <br>
+                <p style="margin-left: 30px; padding-top: 5px;">
+                    <b>Guest Call Leg Profile:</b><br>
+                </p>
+                <br>
+                <p style="margin-left: 30px; padding-top: 5px;">
+                    <b>Host Call Leg Profile:</b><br>
+                </p>
+            </div>
+                <div class="col-xs-10 col-md-8 col-lg-6">
+                    <br>
+                    <p><input type="text" name="guest_CLP" value="{{ guestCLP }}" readonly style="width: 100%"></p>
+                    <br>
+                    <p><input type="text" name="host_CLP" value="{{ hostCLP }}" readonly style="width: 100%;"></p>
+                </div>
+            <div class="col-xs-1 col-md-2 col-lg-3">
+                <br>
+                {% if guestCLP == """" %}
+                    <p><input type=submit id="submit" class='btn btn-primary' name="create_guest_CLP" value="Create Guest CLP" style="width: 150px;"></p>
+                {% else %}
+                    <br>
+                    <br>
+                {% endif %}
+                {% if hostCLP == "" %}
+                    <p><input type=submit id="submit" class='btn btn-primary' name="create_host_CLP" value="Create Host CLP" style="margin-top: 5px; width: 150px;"></p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-1 col-md-2 col-lg-3">
+                <br>
+                <p style="margin-left: 30px; padding-top: 10px;">
+                    <b>{{ form.tenant.label }}:</b><br>
+                </p>
+                <br>
+                <p style="margin-left: 30px; padding-top: 10px;">
+                    <b>{{ form.tenants.label }}:</b><br>
+                </p>
+                <br>
+                <p style="margin-left: 30px; padding-top: 10px;">
+                    <b>{{ form.spaces.label }}:</b><br>
+                </p>
+            </div>
+                <div class="col-xs-10 col-md-8 col-lg-6">
+                    <br>
+                    {{ render_field_no_label(form.tenant) }}
+                    <br>
+                    {{ render_field_no_label(form.tenants) }}
+                    <br>
+                    {{ render_field_no_label(form.spaces, size=15) }}
+                </div>
+            <div class="col-xs-1 col-md-2 col-lg-3">
+                <br>
+                <p><input type=submit id="submit" class='btn btn-primary' name = "create_tenant" value="Create Tenant" style="width: 150px;"></p>
+                <br>
+                <p><input type=submit id="submit" class='btn btn-danger' name = "delete_tenant" value="Delete Tenant" style="margin-top: 3px; width: 150px;"></p>
+                <br>
+                <p><input type=submit id="submit" class='btn btn-danger' name = "delete_spaces" value="Delete Spaces" style="margin-top: 10px; width: 150px;"></p>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
