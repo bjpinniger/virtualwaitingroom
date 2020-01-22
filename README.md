@@ -6,8 +6,6 @@ To create environment variables for config.py add these to .env file in the root
 
 You'll also need to provide a connection URI to a Mongo DB.
 
-clone canopy - https://github.com/ciscocms/canopy
-
 install requirements by running the following: pip install -r requirements.txt
 
 The first time you login to the app make sure you login with user/password = admin/admin. There are some initial setup tasks that need to be performed, such as creating Call Leg Profiles and Tenants on the CMS server.
