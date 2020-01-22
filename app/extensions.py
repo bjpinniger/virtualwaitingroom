@@ -29,8 +29,10 @@ class Extensions:
         result = "failure"
         user_collection = mongo.db.users
         user = user_collection.find_one({'_id': username})
-        if user['_id'] == "admin":
-            try:
+        validate = True
+        try:
+            if user['_id'] == "admin":
+                validate = False
                 if user['Password'] == "admin" and password == "admin":
                     result = "changePWD"
                 else:
@@ -38,9 +40,9 @@ class Extensions:
                     result = "success" if decoded_pwd.decode("utf-8") == password else "failure"
                     print (decoded_pwd.decode("utf-8") )
                     print ("pwd = " + password)
-            except Exception as e:
-                print (e)
-        elif User.validate_login(username, password):  
+        except Exception as e:
+            print (e)
+        if validate and User.validate_login(username, password):  
             if not user:
                 user_collection.insert({'_id': username, 'Name': fullName})
                 user = user_collection.find_one({'_id': username})
