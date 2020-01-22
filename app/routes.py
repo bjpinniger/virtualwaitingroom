@@ -163,10 +163,12 @@ def settings():
     else:
         Callback = Extensions.get_settings(current_user.username)
         form = Endpoint()
-        form.endpoint.data = Callback
+        if Callback != "":
+            form.endpoint.data = Callback
         template = "settings.html"
     if request.method == 'POST':
         if form.validate() == False:
+            print (form.validate_on_submit())
             flash('All fields are required.')
             return render_template(template, form = form)
         else:
