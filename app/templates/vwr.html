@@ -1,5 +1,6 @@
 {% extends "bootstrap_base.html" %}
 {% from "_render_field.html" import render_field %}
+{% from "_render_field_no_label.html" import render_field_no_label %}
 
 {% block app_content %}
 <div class="modal fade" id="myModal" role="dialog">
@@ -12,12 +13,35 @@
         <div class="modal-body">
             <form action="" method="post" class="form" role="form">
                 {{ form.csrf_token() }}
-                {{ render_field(form.endpoint) }}
+                <div class="col-xs-10">
+                    {{ render_field_no_label(form.endpoint) }}
+                </div>
+                <div class="col-xs-2">
+                    <button type="submit" id="PlaceCall" class="btn btn-success float-right"><img src="{{ url_for('static', filename='audio-video_28@3x.png') }}" height="20"></button>
+                </div>
             <p style="display: none">{{form.callid}}</p>
             <p style="display: none">{{form.tenant_id}}</p>
             <p></p>
-            <p><input type="submit" id="PlaceCall" class='btn btn-primary btn-block' value="Place Call"></p>
             </form>               
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+</div>
+<div class="modal fade" id="PatientModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 id="title" class="modal-title">Invite Patient</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>
+                <textarea id="Patient_Invite" value="" readonly style="width: 75%; margin-right: 5pt;"></textarea>
+                <button type="button" class="btn btn-link" id="copy" ><img src="{{ url_for('static', filename='copy_24@3x.png') }}" style="width: 20%; padding-bottom: 20pt;"></button>
+            </p>              
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -34,6 +58,7 @@
         <br>
         <br>
         <button type="button" class="btn btn-secondary float-right" id="refresh">Refresh</button>
+        <button type="button" class="btn btn-secondary float-right" data-toggle="modal" data-target="#PatientModal" style="width: 120pt; margin-right: 10pt;" id="Invite">Invite Patient</button>
     </div>
 </div>
 <div class="row">
@@ -76,6 +101,7 @@
     </div>
 </div>
 
+
 {% endblock %}
 
 {% block scripts %}
@@ -91,12 +117,28 @@ $(document).ready(function () {
             $.post("sendcmd",
             data,
             function(data,status){
-            console.log("Data: " + data + "\nStatus: " + status);
+            console.log("Data: " + data['result'] + "\nStatus: " + status);
             window.location.reload();
             });
         } else if ($(this).attr("id") == "CallMe") {
             document.getElementById("callid").value = $(this).attr("call_id");
-        } else if ($(this).attr("id") == "refresh") {
+        } else if ($(this).attr("id") == "Invite") {
+            var data = {
+                tenant_id: document.getElementById("tenant_id").value
+            }
+            $.post("create_link",
+            data,
+            function(data,status){
+                document.getElementById("Patient_Invite").value = data['link']
+                console.log("Data: " + data['link'] + "\nStatus: " + status);
+            });
+        } else if ($(this).attr("id") == "copy"){
+            var copyText = document.getElementById("Patient_Invite");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+            document.execCommand("copy");
+        }
+        else if ($(this).attr("id") == "refresh") {
             window.location.reload();
         }
     });

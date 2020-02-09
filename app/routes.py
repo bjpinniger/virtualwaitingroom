@@ -13,6 +13,18 @@ from .user import User
 app.config.from_object(Config)
 app.secret_key = Config.SECRET_KEY
 
+# - - - Functions - - -
+
+def CreatePatientLink(tenant_name, tenant_id):
+    now = datetime.utcnow()
+    timestamp_now = time.mktime(now.timetuple()) + now.microsecond * 1e-6
+    timestamp_str = str(timestamp_now).rsplit('.',1)[1]
+    space_name = tenant_name.replace(" ", "_") + "_" + timestamp_str
+    coSpace_id = CMS.createSpace(space_name, tenant_id)
+    link, callId, ownerJid = CMS.getCoSpaceDetails(coSpace_id)
+    CMS.createAccessMethod(coSpace_id, callId, space_name)
+    return link
+
 # - - - Routes - - -
 
 @app.route('/', methods=['GET', 'POST'])
@@ -83,13 +95,7 @@ def patient():
     if request.method == 'POST':
         tenant_id = request.form['tenants']
         tenant_name =  dict(form.tenants.choices).get(form.tenants.data)
-        now = datetime.utcnow()
-        timestamp_now = time.mktime(now.timetuple()) + now.microsecond * 1e-6
-        timestamp_str = str(timestamp_now).rsplit('.',1)[1]
-        space_name = tenant_name.replace(" ", "_") + "_" + timestamp_str
-        coSpace_id = CMS.createSpace(space_name, tenant_id)
-        link, callId, ownerJid = CMS.getCoSpaceDetails(coSpace_id)
-        CMS.createAccessMethod(coSpace_id, callId, space_name)
+        link = CreatePatientLink(tenant_name, tenant_id)
         return redirect(link)
     elif request.method == 'GET':
         return render_template('index.html', form = form)
@@ -202,6 +208,21 @@ def sendcmd():
             CMS.addUserToCospace(coSpace_id, userJid)
         data = {
             "result": "success"
+        }
+        response = app.response_class(response=json.dumps(data),
+                                status=200,
+                                mimetype='application/json')
+        return response
+
+@app.route("/create_link", methods=['GET', 'POST'])
+def create_link():
+    if request.method == 'POST':
+        tenant_id = request.form['tenant_id']
+        print ('tenant id: ' + tenant_id)
+        tenant_name = CMS.getTenant(tenant_id)
+        link = CreatePatientLink(tenant_name, tenant_id)
+        data = {
+            "link": link
         }
         response = app.response_class(response=json.dumps(data),
                                 status=200,
